@@ -15,6 +15,7 @@ parser.add_argument('--queue',   '-q',   type=str, nargs='?',             help="
 parser.add_argument('--gputype',         type=str, nargs='*', choices=gpu_choices, help="Could be {rtx_2080, rtx_3090, A100}, can give a space-separated list --gputype rtx_2080 rtx_3090")
 parser.add_argument('--exclude_40G_A100', action='store_true', help="Scheduler doesn't know the difference between the 40G and 80G A100s, but some code will only run on the 80G cards")
 parser.add_argument('--exclude-a100s', action='store_true', help='use when you have a small job to avoid hogging A100s')
+parser.add_argument('--exclude-80G-a100s', action='store_true', help='use when you have a small job to avoid hogging A100s')
 
 # remove args after --cmd, if present
 if "--cmd" in sys.argv:
@@ -60,6 +61,8 @@ if args.exclude_a100s:
     # find out the gpu for each node with the following bash cmd:
     # `sinfo -p cnu -o "%50N %10c %20m %30G"`
     cmd += ' --exclude=' + ','.join([f"bp1-gpu{n:03d}" for n in [31, 32, 38, 39]])
+elif args.exclude_80G_a100s:
+    cmd += ' --exclude=' + ','.join([f"bp1-gpu{n:03d}" for n in [38, 39]])
 elif args.exclude_40G_A100:
     cmd = cmd + " --exclude=bp1-gpu031,bp1-gpu032"
 
